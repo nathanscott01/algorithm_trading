@@ -24,7 +24,8 @@ def fetch_snp500_stocklist():
     # Extract the table with tickers
     sp500_table = tables[0]  # The first table contains the S&P 500 stocks
     sp500_tickers = sp500_table['Symbol'].tolist()  # Get the ticker column
-    return sp500_tickers
+    updated_sp500_tickers = [item.replace('.', '-') for item in sp500_tickers]
+    return updated_sp500_tickers
 
 
 def fetch_snp500_data(tickers):
@@ -43,28 +44,30 @@ def fetch_snp500_data(tickers):
     return final_dataframe
 
 
-def shares_to_buy(stock_data):
+def shares_to_buy(stock_dataframe):
     """Calculate the number of shares to buy/sell"""
-    # Prompt the user for portfolio size
-    portfolio_recorded = False
-    while not portfolio_recorded:
-        portfolio_size = input("Enter the value of your portfolio:")
-        try:
-            val = float(portfolio_size)
-            portfolio_recorded = True
-        except ValueError:
-            print("Thats not a number! Try again\n")
-    print(f"Portfolio size recorded: {val}")
+    # # Prompt the user for portfolio size
+    # portfolio_recorded = False
+    # while not portfolio_recorded:
+    #     portfolio_size = input("Enter the value of your portfolio:")
+    #     try:
+    #         val = float(portfolio_size)
+    #         portfolio_recorded = True
+    #     except ValueError:
+    #         print("Thats not a number! Try again\n")
+    # print(f"Portfolio size recorded: {val}")
+
+    val = float(30000000)
 
     # Determine number of shares to buy
-    position_size = val / len(stock_data.index)
-    for i in range(len(stock_data)):
-        stock_price = stock_data.loc[i, 'Stock Price']
+    position_size = val / len(stock_dataframe.index)
+    for i in range(len(stock_dataframe)):
+        stock_price = stock_dataframe.loc[i, 'Stock Price']
         if pd.notna(stock_price) and isinstance(stock_price, (int, float)):
-            stock_data.loc[i, 'Number of Shares to Buy'] = math.floor(position_size / stock_price)
+            stock_dataframe.loc[i, 'Number of Shares to Buy'] = math.floor(position_size / stock_price)
         else:
-            stock_data.loc[i, 'Number of Shares to Buy'] = 'N/A'
-    return stock_data
+            stock_dataframe.loc[i, 'Number of Shares to Buy'] = 'N/A'
+    return stock_dataframe
 
 
 def build_spreadsheet(final_data):
@@ -72,8 +75,8 @@ def build_spreadsheet(final_data):
     writer = pd.ExcelWriter('recommended_trades.xlsx', engine='xlsxwriter')
     final_data.to_excel(writer, sheet_name='Recommended Trades', index=False)
 
-    background_color = '#0a0a23'
-    font_color = '#ffffff'
+    background_color = '#ffffff'
+    font_color = '#000000'
 
     string_format = writer.book.add_format(
         {
@@ -119,4 +122,3 @@ sp_stocklist = fetch_snp500_stocklist()
 stock_data = fetch_snp500_data(sp_stocklist)
 final_stock_data = shares_to_buy(stock_data)
 build_spreadsheet(final_stock_data)
-
