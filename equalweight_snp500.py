@@ -64,7 +64,6 @@ def shares_to_buy(stock_data):
             stock_data.loc[i, 'Number of Shares to Buy'] = math.floor(position_size / stock_price)
         else:
             stock_data.loc[i, 'Number of Shares to Buy'] = 'N/A'
-    print("Data recorded\n")
     return stock_data
 
 
