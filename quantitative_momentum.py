@@ -1,13 +1,16 @@
 """
 Nathan Scott
-Equal Weight SNP500 Algorithm
+Quantitative Momentum Strategy
 Personal Project
-Not for real-world use
+Not for real world use
 """
 
-import pandas as pd
+import numpy as np
 import os
+import pandas as pd
+import xlsxwriter
 import math
+from scipy import stats
 from extract_market_data import extract_market_data
 
 
@@ -19,7 +22,11 @@ def retrieve_data():
     if not os.path.exists(filename):
         extract_market_data()
 
-    return pd.read_csv(filename)
+    data = pd.read_csv(filename)
+    data.sort_values('Overnight Price Return', ascending=False, inplace=True)
+    data = data[:51]
+    data.reset_index(drop=True, inplace=True)
+    return data
 
 
 def shares_to_buy(stock_dataframe):
@@ -48,7 +55,7 @@ def shares_to_buy(stock_dataframe):
 
 def build_spreadsheet(final_data):
     """Write our final data to a csv file"""
-    writer = pd.ExcelWriter('equalweight_recommended_trades.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter('quantitative_momentum_recommended_trades.xlsx', engine='xlsxwriter')
     final_data.to_excel(writer, sheet_name='Recommended Trades', index=False)
 
     background_color = '#ffffff'
